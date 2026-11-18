@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#080D1A"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="24dp">
+
+        <!-- Top Drag Pill -->
+        <View
+            android:layout_width="38dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="18dp"
+            android:background="@drawable/bg_drop_loading_pill"
+            android:backgroundTint="#33FFFFFF" />
+
+        <!-- Sheet Header (Clean & Minimal - No Max Saver Badge) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Settings"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="-0.02" />
+        </LinearLayout>
+
+        <!-- SECTION 1: MINIMAL APP ICON & LAUNCHER DRAWER -->
+        <LinearLayout
+            android:id="@+id/headerIconSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_music_note_small"
+                app:tint="@color/neon_coral"
+                android:contentDescription="Icon" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="APP ICON &amp; STYLE"
+                android:textColor="@color/neon_coral"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:id="@+id/tvActiveIconLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wave"
+                android:textColor="#88FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <!-- 21 Minimal Icon Styles Carousel -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvIconStyles"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:layout_marginTop="12dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:scrollbars="none" />
+
+        <!-- App Name (Strictly Hum - Fixed) & Home Screen Pin Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_settings_card"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="App Name:"
+                android:textColor="#88FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvAppNameFixed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Hum"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-black" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPinShortcut"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:paddingHorizontal="8dp"
+                android:text="Pin to Home"
+                android:textColor="@color/neon_coral"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-black" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:background="#1AFFFFFF" />
+
+        <!-- SECTION 2: NOTIFICATION PLAYER (Replacing "Notification Disguise") -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_notification_music"
+                app:tint="@color/neon_coral"
+                android:contentDescription="Notification" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_height="wrap_content"
+                android:text="NOTIFICATION PLAYER"
+                android:textColor="@color/neon_coral"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchCustomMetadata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Custom Notification Info"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:thumbTint="#FFFFFF"
+            app:trackTint="@color/neon_coral" />
+
+        <!-- Notification Player Custom Fields -->
+        <LinearLayout
+            android:id="@+id/layoutCustomFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Notification Track Title"
+                android:textColorHint="#77FFFFFF"
+                app:boxStrokeColor="@color/neon_coral"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1.5dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCustomTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Notification Artist / Subtitle"
+                android:textColorHint="#77FFFFFF"
+                app:boxStrokeColor="@color/neon_coral"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1.5dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCustomArtist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutArtworkDropdown"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Notification Artwork Style"
+                android:textColorHint="#77FFFFFF"
+                app:boxStrokeColor="@color/neon_coral"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1.5dp">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actvArtwork"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Save Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveSettings"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/neon_coral"
+            android:text="Apply Settings"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-black"
+            app:cornerRadius="14dp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

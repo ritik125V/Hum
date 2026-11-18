@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.BraveMusic" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">@color/oled_black</item>
+        <item name="android:navigationBarColor">@color/oled_black</item>
+        <item name="android:windowBackground">@color/oled_black</item>
+        <item name="colorPrimary">@color/brave_orange</item>
+        <item name="colorSurface">@color/oled_black</item>
+    </style>
+
+    <style name="RoundedAppIcon">
+        <item name="cornerSize">16dp</item>
+    </style>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="18"
+    android:viewportHeight="18">
+    <!-- Minimal Outline Shield with Checkmark -->
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M9,2 L4,4 v4.5 C4,12.5 6.2,15.2 9,16 C11.8,15.2 14,12.5 14,8.5 V4 L9,2 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M7,8.5 L8.5,10 L11.5,7" />
+</vector>

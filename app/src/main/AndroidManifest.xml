@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BraveMusic"
+        android:usesCleartextTraffic="false"
+        android:hardwareAccelerated="true"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="34">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.BraveMusic">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <!-- HUM Launcher Icon Aliases (All labeled @string/app_name = "Hum") -->
+        <!-- 1. Wave (Default) -->
+        <activity-alias
+            android:name=".LauncherDefault"
+            android:targetActivity=".MainActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Blob -->
+        <activity-alias
+            android:name=".LauncherBlob"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_blob"
+            android:roundIcon="@mipmap/ic_launcher_blob_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 2. Spark -->
+        <activity-alias
+            android:name=".LauncherSpark"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_spark"
+            android:roundIcon="@mipmap/ic_launcher_spark_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 3. Grin -->
+        <activity-alias
+            android:name=".LauncherGrin"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_grin"
+            android:roundIcon="@mipmap/ic_launcher_grin_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 4. Pop -->
+        <activity-alias
+            android:name=".LauncherPop"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_pop"
+            android:roundIcon="@mipmap/ic_launcher_pop_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 5. Orbit -->
+        <activity-alias
+            android:name=".LauncherOrbit"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_orbit"
+            android:roundIcon="@mipmap/ic_launcher_orbit_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 6. Slide -->
+        <activity-alias
+            android:name=".LauncherSlide"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_slide"
+            android:roundIcon="@mipmap/ic_launcher_slide_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 7. Split -->
+        <activity-alias
+            android:name=".LauncherSplit"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_split"
+            android:roundIcon="@mipmap/ic_launcher_split_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 8. Ripple -->
+        <activity-alias
+            android:name=".LauncherRipple"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ripple"
+            android:roundIcon="@mipmap/ic_launcher_ripple_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 9. Stack -->
+        <activity-alias
+            android:name=".LauncherStack"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_stack"
+            android:roundIcon="@mipmap/ic_launcher_stack_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 10. Luv -->
+        <activity-alias
+            android:name=".LauncherLuv"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_luv"
+            android:roundIcon="@mipmap/ic_launcher_luv_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 11. Eye -->
+        <activity-alias
+            android:name=".LauncherEye"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_eye"
+            android:roundIcon="@mipmap/ic_launcher_eye_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 12. Waves -->
+        <activity-alias
+            android:name=".LauncherWaves"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_waves"
+            android:roundIcon="@mipmap/ic_launcher_waves_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 13. Pulse -->
+        <activity-alias
+            android:name=".LauncherPulse"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_pulse"
+            android:roundIcon="@mipmap/ic_launcher_pulse_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 14. Eclipse -->
+        <activity-alias
+            android:name=".LauncherEclipse"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_eclipse"
+            android:roundIcon="@mipmap/ic_launcher_eclipse_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 15. Halo -->
+        <activity-alias
+            android:name=".LauncherHalo"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halo"
+            android:roundIcon="@mipmap/ic_launcher_halo_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 16. Cans -->
+        <activity-alias
+            android:name=".LauncherCans"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_cans"
+            android:roundIcon="@mipmap/ic_launcher_cans_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 17. Wave -->
+        <activity-alias
+            android:name=".LauncherWave"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_wave"
+            android:roundIcon="@mipmap/ic_launcher_wave_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 18. Note -->
+        <activity-alias
+            android:name=".LauncherNote"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_note"
+            android:roundIcon="@mipmap/ic_launcher_note_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 19. Dot -->
+        <activity-alias
+            android:name=".LauncherDot"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_dot"
+            android:roundIcon="@mipmap/ic_launcher_dot_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 20. Bars -->
+        <activity-alias
+            android:name=".LauncherBars"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_bars"
+            android:roundIcon="@mipmap/ic_launcher_bars_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- 21. Loop -->
+        <activity-alias
+            android:name=".LauncherLoop"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_loop"
+            android:roundIcon="@mipmap/ic_launcher_loop_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Legacy aliases for seamless updates -->
+        <activity-alias
+            android:name=".LauncherMasculine"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_orbit"
+            android:roundIcon="@mipmap/ic_launcher_orbit_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherGenZ"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_pulse"
+            android:roundIcon="@mipmap/ic_launcher_pulse_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherFeminine"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halo"
+            android:roundIcon="@mipmap/ic_launcher_halo_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherStealth"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_loop"
+            android:roundIcon="@mipmap/ic_launcher_loop_round"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".playback.MediaPlaybackService"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

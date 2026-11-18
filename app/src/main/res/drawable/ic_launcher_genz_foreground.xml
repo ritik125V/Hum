@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Vibe: Acid Neon Lime (#D4FF00) Minimal Sound Wave -->
+    <path
+        android:fillColor="#D4FF00"
+        android:pathData="M32,48 a4.5,4.5 0 0,1 4.5,4.5 v3 a4.5,4.5 0 0,1 -9,0 v-3 a4.5,4.5 0 0,1 4.5,-4.5 Z" />
+    <path
+        android:fillColor="#D4FF00"
+        android:pathData="M45,34 a4.5,4.5 0 0,1 4.5,4.5 v31 a4.5,4.5 0 0,1 -9,0 v-31 a4.5,4.5 0 0,1 4.5,-4.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M58,24 a4.5,4.5 0 0,1 4.5,4.5 v51 a4.5,4.5 0 0,1 -9,0 v-51 a4.5,4.5 0 0,1 4.5,-4.5 Z" />
+    <path
+        android:fillColor="#D4FF00"
+        android:pathData="M71,38 a4.5,4.5 0 0,1 4.5,4.5 v23 a4.5,4.5 0 0,1 -9,0 v-23 a4.5,4.5 0 0,1 4.5,-4.5 Z" />
+</vector>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="18"
+    android:viewportHeight="18">
+    <!-- Minimal Modern Incognito / Audio Disguise Glasses & Wave -->
+    <!-- Left Lens -->
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.5"
+        android:pathData="M3,9.5 a3,2.5 0 1,0 6,0 a3,2.5 0 1,0 -6,0" />
+    <!-- Right Lens -->
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.5"
+        android:pathData="M9,9.5 a3,2.5 0 1,0 6,0 a3,2.5 0 1,0 -6,0" />
+    <!-- Bridge -->
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M7.5,8 C8.2,7.5 9.8,7.5 10.5,8" />
+    <!-- Stealth Sound Wave Accent -->
+    <path
+        android:strokeColor="#FF7A29"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M5,14 L7,14 M9,13.5 L9,14.5 M11,14 L13,14" />
+</vector>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- True OLED Black for minimum power draw on AMOLED screens -->
+    <color name="oled_black">#000000</color>
+    <color name="surface_dark">#121212</color>
+    <color name="surface_card">#1E1E1E</color>
+    <color name="brave_orange">#FF5500</color>
+    <color name="brave_orange_light">#FF7733</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AAAAAA</color>
+    <!-- Dual-Tone Minimal Bluish Accent Palette -->
+    <color name="hum_blue">#336BFF</color>
+    <color name="hum_blue_light">#5C8AFF</color>
+    <color name="hum_blue_dark">#1A4ED8</color>
+    <color name="neon_coral">#336BFF</color>
+    <color name="electric_violet">#4D7CFF</color>
+    <color name="surface_glass">#E6080D1A</color>
+    <color name="border_glass">#33336BFF</color>
+
+    <!-- HUM 21 Adaptive Icon Background Colors -->
+    <color name="ic_bg_blob">#FF50A2</color>
+    <color name="ic_bg_spark">#313DFF</color>
+    <color name="ic_bg_grin">#FFD300</color>
+    <color name="ic_bg_pop">#C8B7FF</color>
+    <color name="ic_bg_orbit">#131316</color>
+    <color name="ic_bg_slide">#7BF5C7</color>
+    <color name="ic_bg_split">#181818</color>
+    <color name="ic_bg_ripple">#FFF3D5</color>
+    <color name="ic_bg_stack">#895CFF</color>
+    <color name="ic_bg_luv">#FFF3D5</color>
+    <color name="ic_bg_eye">#D3FF41</color>
+    <color name="ic_bg_waves">#FF893F</color>
+    <color name="ic_bg_pulse">#171719</color>
+    <color name="ic_bg_eclipse">#171719</color>
+    <color name="ic_bg_halo">#171719</color>
+    <color name="ic_bg_cans">#FFC83E</color>
+    <color name="ic_bg_wave">#336BFF</color>
+    <color name="ic_bg_note">#3FDB96</color>
+    <color name="ic_bg_dot">#F4F2EB</color>
+    <color name="ic_bg_bars">#E3DDFF</color>
+    <color name="ic_bg_loop">#171719</color>
+</resources>

@@ -1,0 +1,32 @@
+! Title: Brave Music Player Core Shield Rules
+! Description: YouTube Music ad-blocking and anti-tracker rules based on Brave Shields
+||googleads.g.doubleclick.net^
+||pagead2.googlesyndication.com^
+||partner.googleadservices.com^
+||pubads.g.doubleclick.net^
+||securepubads.g.doubleclick.net^
+||static.doubleclick.net^
+||youtube.com/pagead/*
+||music.youtube.com/pagead/*
+||youtube.com/api/stats/ads*
+||music.youtube.com/api/stats/ads*
+||youtube.com/api/stats/qoe*
+||music.youtube.com/api/stats/qoe*
+||youtube.com/api/stats/atr*
+||music.youtube.com/api/stats/atr*
+||youtube.com/ptracking*
+||music.youtube.com/ptracking*
+||music.youtube.com/youtubei/v1/log_event*
+||music.youtube.com/youtubei/v1/feedback*
+||play.google.com/log*
+||fls-na.amazon.com^
+||sb.scorecardresearch.com^
+||youtube.com/generate_204*
+||music.youtube.com/generate_204*
+||youtube.com/get_midroll_info*
+||music.youtube.com/get_midroll_info*
+! Cosmetic hiding of YouTube Music promo banners
+music.youtube.com##ytmusic-banner-promo-renderer
+music.youtube.com##.ytmusic-mealbar-promo-renderer
+music.youtube.com##ytmusic-pivot-bar-item-renderer[tab-id="SPunlimited"]
+music.youtube.com##ytmusic-player-page #masthead-ad

@@ -1,0 +1,143 @@
+/* 
+ * True AMOLED Theme & Natural Native Touch Physics for Modern Music Player
+ * - Preserves Android native touch slop & tap-vs-scroll disambiguation
+ * - Fluid kinetic scrolling matching Spotify & Chrome Mobile
+ * - Removes tap highlight rectangles
+ * - Clean class-based cosmetic ad hiding with zero overhead
+ */
+html, body {
+    background-color: #000000 !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Ensure text inputs and search bars are fully focusable and trigger IME soft keyboard */
+input, textarea, [contenteditable="true"] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    pointer-events: auto !important;
+}
+
+/* 
+ * Signature Hum Wave Cobalt Blue Accent on scrubber knob and progress bar
+ */
+#progress-bar.ytmusic-player-bar,
+ytmusic-player-bar #progress-bar,
+#sliderBar,
+.slider-knob-inner.tp-yt-paper-slider {
+    --paper-slider-active-color: #336BFF !important;
+    --paper-slider-knob-color: #336BFF !important;
+}
+
+/* 
+ * Ensure 3-dot dropdown menus and popups stay above all layout layers
+ */
+ytmusic-popup-container,
+tp-yt-iron-dropdown[opened],
+ytmusic-menu-popup-renderer {
+    z-index: 10000 !important;
+}
+
+/* 
+ * Completely Hide YouTube & YouTube Music Branding Across Application
+ */
+ytmusic-logo,
+.ytmusic-logo,
+#logo,
+#logo.ytmusic-nav-bar,
+picture.ytmusic-logo,
+a.ytmusic-logo,
+.ytp-watermark,
+.ytp-youtube-button,
+a[aria-label*="YouTube" i],
+a[title*="YouTube" i],
+yt-icon[icon*="logo" i],
+yt-icon[icon*="youtube" i] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* 
+ * Hide Left Desktop Mini-Guide & Sidebar Artifacts (preserves mobile navigation drawer)
+ */
+#mini-guide,
+#mini-guide-background {
+    display: none !important;
+    width: 0 !important;
+    visibility: hidden !important;
+}
+
+/* 
+ * Hide Empty Thumbnail Placeholder & Inactive Player Bar when No Song is Playing
+ * (Eliminates the empty rectangular black box on the bottom left)
+ */
+.mweb-thumbnail-image-wrapper:has(img[hidden]),
+.mweb-thumbnail-image-wrapper:has(img[src=""]),
+.mweb-thumbnail-image-wrapper:has(img:not([src])),
+ytmusic-player-bar[inert],
+ytmusic-player-bar[disable-click-listener] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 
+ * Cosmetic Ad Shield: Clean, fast class-based rules
+ */
+.video-ads,
+.ytp-ad-module,
+.ytp-ad-player-overlay,
+.ytp-ad-overlay-container,
+.ytp-ad-message-container,
+.ytp-ad-action-interstitial,
+.ytp-ad-preview-container,
+.ytmusic-ad-renderer,
+ytmusic-ad-renderer,
+ytmusic-banner-promo-renderer,
+ytmusic-pivot-bar-item-renderer[tab-id="SPunlimited"],
+.app-install-link,
+button.open-app-button,
+.open-app-button,
+ytmusic-open-in-app-button,
+#masthead-ad {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 
+ * Blind ad videos if any reach the player to eliminate frame flashes
+ */
+.ad-showing video,
+.ad-interrupting video {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    filter: brightness(0) !important;
+}
+
+/*
+ * Never allow modal backdrops or promo popups to trap touch interactions
+ */
+iron-overlay-backdrop,
+tp-yt-iron-overlay-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+ytmusic-mealbar-promo-renderer,
+tp-yt-paper-dialog:has(ytmusic-mealbar-promo-renderer) {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}

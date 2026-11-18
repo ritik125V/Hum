@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Modern Minimal Studio Audio Tuner / Mixer Sliders -->
+    <!-- Top Track -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M3,7 L14,7 M18,7 L21,7" />
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.8"
+        android:fillColor="#161616"
+        android:pathData="M16,7m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0" />
+
+    <!-- Middle Track -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M3,12 L6,12 M10,12 L21,12" />
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.8"
+        android:fillColor="#161616"
+        android:pathData="M8,12m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0" />
+
+    <!-- Bottom Track -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M3,17 L12,17 M16,17 L21,17" />
+    <path
+        android:strokeColor="#FF5500"
+        android:strokeWidth="1.8"
+        android:fillColor="#161616"
+        android:pathData="M14,17m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0" />
+</vector>
