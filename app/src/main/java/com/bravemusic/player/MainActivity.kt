@@ -28,7 +28,6 @@ import com.bravemusic.player.databinding.ActivityMainBinding
 import com.bravemusic.player.playback.AudioDiskCache
 import com.bravemusic.player.playback.MediaPlaybackService
 import com.bravemusic.player.ui.SettingsBottomSheet
-import com.bravemusic.player.utils.SettingsManager
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
 import com.bravemusic.player.webview.MusicWebViewClient
@@ -37,7 +36,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var audioCache: AudioDiskCache
-    private lateinit var settings: SettingsManager
     private lateinit var webChromeClient: MusicWebChromeClient
     private var playbackService: MediaPlaybackService? = null
     private var isServiceBound = false
@@ -93,7 +91,6 @@ class MainActivity : AppCompatActivity() {
 
         // 3. Initialize Audio Disk Cache for zero-data repeat plays
         audioCache = AudioDiskCache(applicationContext)
-        settings = SettingsManager(applicationContext)
 
         // 4. Start & Bind Media Playback Service
         val serviceIntent = Intent(this, MediaPlaybackService::class.java)
@@ -217,9 +214,6 @@ class MainActivity : AppCompatActivity() {
                         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
                         imm?.hideSoftInputFromWindow(binding.webView.windowToken, 0)
                     }
-                },
-                isAudioOnlyCallback = {
-                    settings.isAudioOnlyEnabled
                 }
             ),
             "BraveMusicBridge"
@@ -233,7 +227,6 @@ class MainActivity : AppCompatActivity() {
             onPageLoaded = {
                 runOnUiThread {
                     webChromeClient.hideDropLoading()
-                    applyAudioOnlyMode()
                 }
             }
         )
@@ -383,15 +376,9 @@ class MainActivity : AppCompatActivity() {
         val settingsSheet = SettingsBottomSheet(
             onSettingsChanged = {
                 playbackService?.refreshMetadataFromSettings()
-                applyAudioOnlyMode()
             }
         )
         settingsSheet.show(supportFragmentManager, SettingsBottomSheet.TAG)
-    }
-
-    private fun applyAudioOnlyMode() {
-        val enabled = settings.isAudioOnlyEnabled
-        executeJs("if (window.BraveMusicControls && window.BraveMusicControls.setAudioOnly) { window.BraveMusicControls.setAudioOnly($enabled); }")
     }
 
     private fun requestNotificationPermission() {

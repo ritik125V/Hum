@@ -7,8 +7,7 @@ class BraveMusicBridge(
     private val onPlaybackStateCallback: (isPlaying: Boolean) -> Unit,
     private val onPlayerStateCallback: ((isExpanded: Boolean) -> Unit)? = null,
     private val showKeyboardCallback: (() -> Unit)? = null,
-    private val hideKeyboardCallback: (() -> Unit)? = null,
-    private val isAudioOnlyCallback: (() -> Boolean)? = null
+    private val hideKeyboardCallback: (() -> Unit)? = null
 ) {
     @JavascriptInterface
     fun onTrackChanged(title: String, artist: String, album: String, artworkUrl: String) {
@@ -43,10 +42,5 @@ class BraveMusicBridge(
     @JavascriptInterface
     fun hideKeyboard() {
         hideKeyboardCallback?.invoke()
-    }
-
-    @JavascriptInterface
-    fun isAudioOnly(): Boolean {
-        return isAudioOnlyCallback?.invoke() ?: true
     }
 }

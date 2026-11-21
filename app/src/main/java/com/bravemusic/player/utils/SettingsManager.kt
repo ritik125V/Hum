@@ -23,9 +23,8 @@ class SettingsManager(context: Context) {
         get() = prefs.getString(KEY_ARTWORK_PRESET, "default") ?: "default"
         set(value) = prefs.edit().putString(KEY_ARTWORK_PRESET, value).apply()
 
-    var isAudioOnlyEnabled: Boolean
-        get() = prefs.getBoolean(KEY_AUDIO_ONLY, true)
-        set(value) = prefs.edit().putBoolean(KEY_AUDIO_ONLY, value).apply()
+    val isAudioOnlyEnabled: Boolean
+        get() = true // permanently enabled for max data & battery saving
 
     val isAmoledThemeEnabled: Boolean
         get() = true // permanently enabled for max battery saving
