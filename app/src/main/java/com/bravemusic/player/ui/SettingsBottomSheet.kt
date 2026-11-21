@@ -51,6 +51,7 @@ class SettingsBottomSheet(
 
         setupLauncherAndIcons()
         setupNotificationPlayer()
+        setupPlaybackSettings()
 
         // Apply
         binding.btnSaveSettings.setOnClickListener {
@@ -104,6 +105,10 @@ class SettingsBottomSheet(
         binding.actvArtwork.setText(artworkOptions[currentIndex], false)
     }
 
+    private fun setupPlaybackSettings() {
+        binding.switchAudioOnly.isChecked = settings.isAudioOnlyEnabled
+    }
+
     private fun saveAllSettings() {
         settings.isCustomMetadataEnabled = binding.switchCustomMetadata.isChecked
         settings.customTitle = binding.etCustomTitle.text?.toString()?.ifEmpty { "Focus Audio" } ?: "Focus Audio"
@@ -114,6 +119,8 @@ class SettingsBottomSheet(
         if (artIndex >= 0) {
             settings.artworkPreset = artworkKeys[artIndex]
         }
+
+        settings.isAudioOnlyEnabled = binding.switchAudioOnly.isChecked
 
         settings.customLauncherName = IconManager.APP_NAME
 

@@ -17,6 +17,122 @@
     }
     window.__brave_bg_audio_injected = true;
 
+    // 0. Audio-Only Mode State (Suppress music videos & display album artwork)
+    let isAudioOnly = true;
+    if (window.BraveMusicBridge && typeof window.BraveMusicBridge.isAudioOnly === 'function') {
+        try {
+            isAudioOnly = window.BraveMusicBridge.isAudioOnly();
+        } catch (e) {}
+    }
+
+    function applyAudioOnly(enabled) {
+        isAudioOnly = !!enabled;
+        const html = document.documentElement;
+        const body = document.body;
+
+        if (isAudioOnly) {
+            if (html) html.classList.add('audio-only-mode');
+            if (body) body.classList.add('audio-only-mode');
+
+            // Switch to official Song mode if YouTube AV switcher is available
+            try {
+                const songToggle = document.querySelector(
+                    'ytmusic-av-switcher [aria-label*="Song" i], #song-video-toggle .song-button, ytmusic-av-switcher tp-yt-paper-tab:first-child'
+                );
+                if (songToggle) {
+                    const isSelected = songToggle.getAttribute('aria-selected') === 'true' ||
+                                       songToggle.classList.contains('iron-selected');
+                    if (!isSelected) {
+                        songToggle.click();
+                    }
+                }
+            } catch (e) {}
+
+            // Instruct DASH player to stream 144p ('tiny') to reduce video bandwidth by 95%
+            try {
+                const mp = document.getElementById('movie_player');
+                if (mp) {
+                    if (typeof mp.setPlaybackQualityRange === 'function') {
+                        mp.setPlaybackQualityRange('tiny', 'tiny');
+                    }
+                    if (typeof mp.setPlaybackQuality === 'function') {
+                        mp.setPlaybackQuality('tiny');
+                    }
+                }
+            } catch (e) {}
+
+            // Ensure #song-video is suppressed
+            try {
+                const songVideo = document.getElementById('song-video') || document.querySelector('ytmusic-player #song-video');
+                if (songVideo) {
+                    songVideo.style.visibility = 'hidden';
+                    songVideo.style.opacity = '0';
+                    songVideo.style.pointerEvents = 'none';
+                }
+            } catch (e) {}
+
+            // Ensure #song-image is unhidden, styled, and populated with album art / thumbnail
+            try {
+                const songImage = document.getElementById('song-image') || document.querySelector('ytmusic-player #song-image');
+                if (songImage) {
+                    songImage.removeAttribute('hidden');
+                    songImage.style.display = 'flex';
+                    songImage.style.visibility = 'visible';
+                    songImage.style.opacity = '1';
+                    let img = songImage.querySelector('img#img') || songImage.querySelector('img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.id = 'img';
+                        img.className = 'style-scope yt-img-shadow';
+                        songImage.appendChild(img);
+                    }
+                    img.removeAttribute('hidden');
+                    img.style.display = 'block';
+                    img.style.visibility = 'visible';
+                    img.style.opacity = '1';
+                    if (!img.src || img.src.startsWith('data:') || img.src === window.location.href) {
+                        const artwork = extractBestArtwork(null);
+                        if (artwork) {
+                            img.src = artwork;
+                        }
+                    }
+                }
+            } catch (e) {}
+        } else {
+            if (html) html.classList.remove('audio-only-mode');
+            if (body) body.classList.remove('audio-only-mode');
+
+            // Restore video and image styles
+            try {
+                const songVideo = document.getElementById('song-video') || document.querySelector('ytmusic-player #song-video');
+                if (songVideo) {
+                    songVideo.style.visibility = '';
+                    songVideo.style.opacity = '';
+                    songVideo.style.pointerEvents = '';
+                }
+                const songImage = document.getElementById('song-image') || document.querySelector('ytmusic-player #song-image');
+                if (songImage) {
+                    songImage.style.display = '';
+                    songImage.style.visibility = '';
+                    songImage.style.opacity = '';
+                }
+            } catch (e) {}
+
+            // Restore normal playback quality
+            try {
+                const mp = document.getElementById('movie_player');
+                if (mp) {
+                    if (typeof mp.setPlaybackQualityRange === 'function') {
+                        mp.setPlaybackQualityRange('auto', 'auto');
+                    }
+                    if (typeof mp.setPlaybackQuality === 'function') {
+                        mp.setPlaybackQuality('auto');
+                    }
+                }
+            } catch (e) {}
+        }
+    }
+
     // 1. Spoof Page Visibility API (Keep audio playing when app is minimized or screen is locked)
     try {
         if (typeof Document !== 'undefined' && Document.prototype) {
@@ -235,6 +351,9 @@
             if (trackKey !== lastReportedTrackKey) {
                 lastReportedTrackKey = trackKey;
                 notifyTrackChanged(title, artist || 'YouTube Music', 'YouTube Music', artwork);
+                if (isAudioOnly) {
+                    applyAudioOnly(true);
+                }
             }
         } catch (err) {}
     }
@@ -254,11 +373,20 @@
             setTimeout(syncTrackInfoFromPlayer, 1200);
         };
 
-        video.addEventListener('play', function() { reportState(true); });
-        video.addEventListener('playing', function() { reportState(true); });
+        video.addEventListener('play', function() {
+            reportState(true);
+            if (isAudioOnly) applyAudioOnly(true);
+        });
+        video.addEventListener('playing', function() {
+            reportState(true);
+            if (isAudioOnly) applyAudioOnly(true);
+        });
         video.addEventListener('pause', function() { reportState(false); });
         video.addEventListener('ended', function() { reportState(false); });
-        video.addEventListener('loadedmetadata', function() { syncTrackInfoFromPlayer(); });
+        video.addEventListener('loadedmetadata', function() {
+            syncTrackInfoFromPlayer();
+            if (isAudioOnly) applyAudioOnly(true);
+        });
     }
 
     const initialVideo = document.querySelector('video');
@@ -434,6 +562,20 @@
             }
             window.location.href = 'https://music.youtube.com/';
             return true;
+        },
+        setAudioOnly: function(enabled) {
+            applyAudioOnly(enabled);
+        },
+        isAudioOnly: function() {
+            return isAudioOnly;
         }
     };
+
+    // Run initial Audio-Only configuration
+    applyAudioOnly(isAudioOnly);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            applyAudioOnly(isAudioOnly);
+        });
+    }
 })();
