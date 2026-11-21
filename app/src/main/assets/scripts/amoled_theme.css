@@ -81,11 +81,9 @@ yt-icon[icon*="youtube" i] {
  * Hide Empty Thumbnail Placeholder & Inactive Player Bar when No Song is Playing
  * (Eliminates the empty rectangular black box on the bottom left)
  */
-.mweb-thumbnail-image-wrapper:has(img[hidden]),
 .mweb-thumbnail-image-wrapper:has(img[src=""]),
 .mweb-thumbnail-image-wrapper:has(img:not([src])),
-ytmusic-player-bar[inert],
-ytmusic-player-bar[disable-click-listener] {
+ytmusic-player-bar[inert] {
     display: none !important;
     visibility: hidden !important;
 }
