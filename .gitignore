@@ -64,3 +64,7 @@ Cargo.lock
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Test suites & local test results
+test-suite/
+test_results/

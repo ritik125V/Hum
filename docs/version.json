@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "versionCode": 1,
+  "releaseDate": "November 2026",
+  "apkUrl": "app-release.apk",
+  "apkSize": "4.8 MB",
+  "minAndroid": "8.0+",
+  "githubReleaseUrl": "https://github.com/ritik125V/Hum/releases/latest",
+  "githubRepoUrl": "https://github.com/ritik125V/Hum",
+  "highlights": [
+    "Native YouTube Music experience on Android",
+    "Ad-blocking & Background Playback",
+    "True AMOLED pure pitch black theme",
+    "Clean audio notification controls"
+  ]
+}
