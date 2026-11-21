@@ -21,6 +21,98 @@
             android:focusableInTouchMode="true"
             android:background="@color/oled_black" />
 
+        <!-- Native AMOLED Home Feed Container (0ms cold start, Stale-While-Revalidate) -->
+        <LinearLayout
+            android:id="@+id/nativeHomeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@color/oled_black"
+            android:visibility="visible">
+
+            <!-- Native Modern Top App Bar -->
+            <LinearLayout
+                android:id="@+id/nativeTopBar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp"
+                android:background="@color/oled_black">
+
+                <!-- Hum Logo & Wordmark -->
+                <LinearLayout
+                    android:id="@+id/brandContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hum"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="-0.02" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="MUSIC"
+                        android:textColor="#FF4D4D"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.08" />
+                </LinearLayout>
+
+                <!-- Search Action Button -->
+                <ImageView
+                    android:id="@+id/btnTopSearch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_search"
+                    app:tint="#FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Search" />
+
+                <!-- Settings Action Button -->
+                <ImageView
+                    android:id="@+id/btnTopSettings"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_settings"
+                    app:tint="#FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Settings" />
+
+            </LinearLayout>
+
+            <!-- Native Home Feed RecyclerView with SWR Caching -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHomeFeed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingTop="8dp"
+                android:paddingBottom="84dp"
+                android:overScrollMode="ifContentScrolls" />
+
+        </LinearLayout>
+
         <!-- Smooth Dual-Tone Gradient Progress Bar -->
         <ProgressBar
             android:id="@+id/progressBar"

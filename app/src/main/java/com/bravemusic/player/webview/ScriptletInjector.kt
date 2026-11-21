@@ -13,6 +13,7 @@ object ScriptletInjector {
         injectAmoledTheme(context, webView)
         injectBraveCosmeticCss(webView)
         injectScript(context, webView, "scripts/background_audio.js")
+        injectScript(context, webView, "scripts/feed_extractor.js")
     }
 
     private fun injectScript(context: Context, webView: WebView, assetPath: String) {

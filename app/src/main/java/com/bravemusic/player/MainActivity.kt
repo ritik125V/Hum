@@ -22,23 +22,30 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.bravemusic.player.adblock.BraveShield
 import com.bravemusic.player.adblock.BraveShieldSyncWorker
+import com.bravemusic.player.data.feed.FeedCacheRepository
 import com.bravemusic.player.databinding.ActivityMainBinding
 import com.bravemusic.player.playback.AudioDiskCache
 import com.bravemusic.player.playback.MediaPlaybackService
 import com.bravemusic.player.ui.PlayerBottomSheetController
 import com.bravemusic.player.ui.SettingsBottomSheet
+import com.bravemusic.player.ui.feed.FeedSectionAdapter
 import com.bravemusic.player.databinding.LayoutPlayerBottomSheetBinding
 import com.bravemusic.player.utils.SettingsManager
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
 import com.bravemusic.player.webview.MusicWebViewClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var playerController: PlayerBottomSheetController
+    private lateinit var feedRepository: FeedCacheRepository
+    private lateinit var feedAdapter: FeedSectionAdapter
     private lateinit var audioCache: AudioDiskCache
     private lateinit var settings: SettingsManager
     private lateinit var webChromeClient: MusicWebChromeClient
@@ -133,16 +140,18 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        // 9. Setup Back Press Handling: Player collapse, drawer close, and history navigation
+        // 9. Setup Native Home Feed (0ms Cold Start & SWR Caching)
+        setupNativeFeed()
+
+        // 10. Setup Back Press Handling: Player collapse, drawer close, native feed restore, and history navigation
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (isDrawerOpen) {
                     closeDrawer()
                 } else if (playerController.collapse()) {
                     // Collapsed native player sheet
-                } else if (isPlayerExpanded) {
-                    isPlayerExpanded = false
-                    executeJs("if (window.BraveMusicControls && window.BraveMusicControls.collapsePlayer) window.BraveMusicControls.collapsePlayer();")
+                } else if (binding.nativeHomeContainer.visibility != View.VISIBLE) {
+                    binding.nativeHomeContainer.visibility = View.VISIBLE
                 } else if (binding.webView.canGoBack()) {
                     binding.webView.goBack()
                 } else {
@@ -251,6 +260,17 @@ class MainActivity : AppCompatActivity() {
                 onProgressCallback = { currentSeconds, totalSeconds ->
                     runOnUiThread {
                         playerController.updateProgress(currentSeconds, totalSeconds)
+                    }
+                },
+                onHomeFeedLoadedCallback = { feedJson ->
+                    val sections = feedRepository.parseFeedJson(feedJson)
+                    if (sections.isNotEmpty()) {
+                        runOnUiThread {
+                            feedAdapter.updateSections(sections)
+                        }
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            feedRepository.saveFeedCache(feedJson)
+                        }
                     }
                 }
             ),
@@ -407,8 +427,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateHome() {
+        binding.nativeHomeContainer.visibility = View.VISIBLE
+        binding.rvHomeFeed.smoothScrollToPosition(0)
         webChromeClient.showDropLoading()
         executeJs("if (window.BraveMusicControls && window.BraveMusicControls.goHome) { window.BraveMusicControls.goHome(); } else { window.location.href = 'https://music.youtube.com/'; }")
+    }
+
+    private fun setupNativeFeed() {
+        feedRepository = FeedCacheRepository(applicationContext)
+        feedAdapter = FeedSectionAdapter { item ->
+            // Immediate visual feedback (0ms latency)
+            playerController.updateTrack(item.title, item.subtitle, item.thumbnailUrl)
+
+            // Dispatch playback action to web engine
+            val js = "if (window.BraveMusicControls && window.BraveMusicControls.playTrack) { " +
+                    "window.BraveMusicControls.playTrack('${item.videoId ?: ""}', '${item.playlistId ?: ""}'); " +
+                    "} else { " +
+                    "window.location.href = 'https://music.youtube.com/watch?v=${item.videoId ?: ""}'; }"
+            executeJs(js)
+        }
+
+        binding.rvHomeFeed.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        binding.rvHomeFeed.adapter = feedAdapter
+        binding.rvHomeFeed.setHasFixedSize(false)
+
+        // Instant 0ms Cold Start: Load cached feed synchronously from disk
+        val cached = feedRepository.getCachedFeed()
+        feedAdapter.updateSections(cached)
+
+        // Top Bar Actions
+        binding.btnTopSettings.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            openSettings()
+        }
+
+        binding.btnTopSearch.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            binding.nativeHomeContainer.visibility = View.GONE
+            executeJs("const searchBtn = document.querySelector('ytmusic-search-box, [aria-label*=\"Search\" i]'); if (searchBtn) searchBtn.click();")
+        }
     }
 
     private fun openSettings() {

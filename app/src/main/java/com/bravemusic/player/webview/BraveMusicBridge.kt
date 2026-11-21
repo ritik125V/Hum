@@ -9,7 +9,8 @@ class BraveMusicBridge(
     private val showKeyboardCallback: (() -> Unit)? = null,
     private val hideKeyboardCallback: (() -> Unit)? = null,
     private val isAudioOnlyCallback: (() -> Boolean)? = null,
-    private val onProgressCallback: ((currentSeconds: Float, totalSeconds: Float) -> Unit)? = null
+    private val onProgressCallback: ((currentSeconds: Float, totalSeconds: Float) -> Unit)? = null,
+    private val onHomeFeedLoadedCallback: ((feedJson: String) -> Unit)? = null
 ) {
     @JavascriptInterface
     fun onTrackChanged(title: String, artist: String, album: String, artworkUrl: String) {
@@ -29,6 +30,11 @@ class BraveMusicBridge(
     @JavascriptInterface
     fun onProgress(currentSeconds: Float, totalSeconds: Float) {
         onProgressCallback?.invoke(currentSeconds, totalSeconds)
+    }
+
+    @JavascriptInterface
+    fun onHomeFeedLoaded(feedJson: String) {
+        onHomeFeedLoadedCallback?.invoke(feedJson)
     }
 
     @JavascriptInterface
