@@ -354,6 +354,11 @@
             syncTrackInfoFromPlayer();
             if (isAudioOnly) applyAudioOnly(true);
         });
+        video.addEventListener('timeupdate', function() {
+            if (window.BraveMusicBridge && typeof window.BraveMusicBridge.onProgress === 'function') {
+                window.BraveMusicBridge.onProgress(video.currentTime || 0, video.duration || 0);
+            }
+        });
     }
 
     const initialVideo = document.querySelector('video');

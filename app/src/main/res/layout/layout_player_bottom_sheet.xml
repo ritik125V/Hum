@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playerSheetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/oled_black"
+    android:clickable="true"
+    android:focusable="true"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="68dp"
+    app:behavior_skipCollapsed="false"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <!-- 1. FULL PLAYER VIEW (Visible when sheet expands) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fullPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/oled_black"
+        android:alpha="0"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
+        <!-- Top Navigation Bar -->
+        <ImageButton
+            android:id="@+id/btnCollapsePlayer"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="#FFFFFF"
+            android:contentDescription="Collapse Player"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPlayingSource"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="NOW PLAYING"
+            android:textColor="#88FFFFFF"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.1"
+            app:layout_constraintBottom_toBottomOf="@id/btnCollapsePlayer"
+            app:layout_constraintEnd_toStartOf="@id/btnPlayerMenu"
+            app:layout_constraintStart_toEndOf="@id/btnCollapsePlayer"
+            app:layout_constraintTop_toTopOf="@id/btnCollapsePlayer" />
+
+        <ImageButton
+            android:id="@+id/btnPlayerMenu"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_more_vert"
+            app:tint="#FFFFFF"
+            android:contentDescription="Menu"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Album Artwork Card (Square 1:1, Rounded 16dp, Subtle Glow) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFullArtwork"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="10dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#121216"
+            app:layout_constraintBottom_toTopOf="@id/tvFullTitle"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnCollapsePlayer">
+
+            <ImageView
+                android:id="@+id/ivFullArtwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Album Artwork" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Song Title & Artist Info -->
+        <TextView
+            android:id="@+id/tvFullTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="Track Title"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-bold"
+            app:layout_constraintBottom_toTopOf="@id/tvFullArtist"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvFullArtist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="20dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Artist Name"
+            android:textColor="#9E9EA6"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif"
+            app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Scrubbing Seek Bar -->
+        <SeekBar
+            android:id="@+id/playerSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:max="1000"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:progress="0"
+            android:progressTint="#FFFFFF"
+            android:thumbTint="#FFFFFF"
+            app:layout_constraintBottom_toTopOf="@id/tvCurrentTime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Elapsed & Remaining Timestamps -->
+        <TextView
+            android:id="@+id/tvCurrentTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="0:00"
+            android:textColor="#88FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintBottom_toTopOf="@id/btnFullPlayPause"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTotalDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="0:00"
+            android:textColor="#88FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintBottom_toTopOf="@id/btnFullPlayPause"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Controls Row: Shuffle, Previous, Play/Pause, Next, Repeat -->
+        <ImageButton
+            android:id="@+id/btnShuffle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_shuffle"
+            app:tint="#88FFFFFF"
+            android:contentDescription="Shuffle"
+            app:layout_constraintBottom_toBottomOf="@id/btnFullPlayPause"
+            app:layout_constraintEnd_toStartOf="@id/btnPrevious"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnFullPlayPause" />
+
+        <ImageButton
+            android:id="@+id/btnPrevious"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_skip_previous"
+            app:tint="#FFFFFF"
+            android:contentDescription="Previous"
+            app:layout_constraintBottom_toBottomOf="@id/btnFullPlayPause"
+            app:layout_constraintEnd_toStartOf="@id/btnFullPlayPause"
+            app:layout_constraintStart_toEndOf="@id/btnShuffle"
+            app:layout_constraintTop_toTopOf="@id/btnFullPlayPause" />
+
+        <!-- Large Floating Play/Pause Button -->
+        <FrameLayout
+            android:id="@+id/btnFullPlayPause"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_play_btn_circle"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Play or Pause"
+            app:layout_constraintBottom_toTopOf="@id/bottomTabsLayout"
+            app:layout_constraintEnd_toStartOf="@id/btnNext"
+            app:layout_constraintStart_toEndOf="@id/btnPrevious">
+
+            <ImageView
+                android:id="@+id/ivFullPlayPauseIcon"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_play_arrow"
+                app:tint="#FFFFFF"
+                android:contentDescription="Play" />
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_skip_next"
+            app:tint="#FFFFFF"
+            android:contentDescription="Next"
+            app:layout_constraintBottom_toBottomOf="@id/btnFullPlayPause"
+            app:layout_constraintEnd_toStartOf="@id/btnRepeat"
+            app:layout_constraintStart_toEndOf="@id/btnFullPlayPause"
+            app:layout_constraintTop_toTopOf="@id/btnFullPlayPause" />
+
+        <ImageButton
+            android:id="@+id/btnRepeat"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_repeat"
+            app:tint="#88FFFFFF"
+            android:contentDescription="Repeat"
+            app:layout_constraintBottom_toBottomOf="@id/btnFullPlayPause"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnNext"
+            app:layout_constraintTop_toTopOf="@id/btnFullPlayPause" />
+
+        <!-- Bottom Tabs: Up Next / Lyrics / Related -->
+        <LinearLayout
+            android:id="@+id/bottomTabsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="UP NEXT"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="LYRICS"
+                android:textColor="#66FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="RELATED"
+                android:textColor="#66FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 2. MINIPLAYER BAR (Visible when sheet is collapsed at peekHeight=68dp) -->
+    <FrameLayout
+        android:id="@+id/miniplayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_gravity="top"
+        android:background="#16161B"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- Thin hairline progress bar at top of miniplayer -->
+        <ProgressBar
+            android:id="@+id/pbMiniProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="top"
+            android:max="1000"
+            android:progress="0"
+            android:progressTint="@color/neon_coral"
+            android:indeterminate="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp">
+
+            <!-- Rounded Album Artwork -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="#0D0D10">
+
+                <ImageView
+                    android:id="@+id/ivMiniArtwork"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Mini Album Artwork" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Song Title & Artist -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:id="@+id/tvMiniTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:singleLine="true"
+                    android:text="Track Title"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:id="@+id/tvMiniArtist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Artist Name"
+                    android:textColor="#9E9EA6"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Play/Pause Button -->
+            <ImageButton
+                android:id="@+id/btnMiniPlayPause"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_play_arrow"
+                app:tint="#FFFFFF"
+                android:contentDescription="Play/Pause" />
+
+            <!-- Next Button -->
+            <ImageButton
+                android:id="@+id/btnMiniNext"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_skip_next"
+                app:tint="#FFFFFF"
+                android:contentDescription="Next" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

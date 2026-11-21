@@ -27,7 +27,9 @@ import com.bravemusic.player.adblock.BraveShieldSyncWorker
 import com.bravemusic.player.databinding.ActivityMainBinding
 import com.bravemusic.player.playback.AudioDiskCache
 import com.bravemusic.player.playback.MediaPlaybackService
+import com.bravemusic.player.ui.PlayerBottomSheetController
 import com.bravemusic.player.ui.SettingsBottomSheet
+import com.bravemusic.player.databinding.LayoutPlayerBottomSheetBinding
 import com.bravemusic.player.utils.SettingsManager
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
@@ -36,6 +38,7 @@ import com.bravemusic.player.webview.MusicWebViewClient
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var playerController: PlayerBottomSheetController
     private lateinit var audioCache: AudioDiskCache
     private lateinit var settings: SettingsManager
     private lateinit var webChromeClient: MusicWebChromeClient
@@ -110,11 +113,33 @@ class MainActivity : AppCompatActivity() {
         // 7. Setup Slide-in / Slide-out Edge Navigation Drawer
         setupEdgeDrawer()
 
-        // 8. Setup Back Press Handling: Player collapse, drawer close, and history navigation
+        // 8. Setup Native BottomSheet Player Controller
+        playerController = PlayerBottomSheetController(
+            binding = binding.layoutPlayerSheet,
+            onPlayPauseAction = {
+                executeJs("if (window.BraveMusicControls) { const v = document.querySelector('video'); if (v && !v.paused) window.BraveMusicControls.pause(); else window.BraveMusicControls.play(); }")
+            },
+            onNextAction = {
+                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.next) window.BraveMusicControls.next();")
+            },
+            onPreviousAction = {
+                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.previous) window.BraveMusicControls.previous();")
+            },
+            onSeekAction = { seconds ->
+                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.seekTo) window.BraveMusicControls.seekTo($seconds);")
+            },
+            onCollapseAction = {
+                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.collapsePlayer) window.BraveMusicControls.collapsePlayer();")
+            }
+        )
+
+        // 9. Setup Back Press Handling: Player collapse, drawer close, and history navigation
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (isDrawerOpen) {
                     closeDrawer()
+                } else if (playerController.collapse()) {
+                    // Collapsed native player sheet
                 } else if (isPlayerExpanded) {
                     isPlayerExpanded = false
                     executeJs("if (window.BraveMusicControls && window.BraveMusicControls.collapsePlayer) window.BraveMusicControls.collapsePlayer();")
@@ -195,11 +220,13 @@ class MainActivity : AppCompatActivity() {
                 onTrackChangedCallback = { title, artist, album, artworkUrl ->
                     runOnUiThread {
                         playbackService?.updateMetadata(title, artist, album, artworkUrl)
+                        playerController.updateTrack(title, artist, artworkUrl)
                     }
                 },
                 onPlaybackStateCallback = { isPlaying ->
                     runOnUiThread {
                         playbackService?.updatePlaybackState(isPlaying)
+                        playerController.updatePlaybackState(isPlaying)
                     }
                 },
                 onPlayerStateCallback = { isExpanded ->
@@ -220,6 +247,11 @@ class MainActivity : AppCompatActivity() {
                 },
                 isAudioOnlyCallback = {
                     settings.isAudioOnlyEnabled
+                },
+                onProgressCallback = { currentSeconds, totalSeconds ->
+                    runOnUiThread {
+                        playerController.updateProgress(currentSeconds, totalSeconds)
+                    }
                 }
             ),
             "BraveMusicBridge"

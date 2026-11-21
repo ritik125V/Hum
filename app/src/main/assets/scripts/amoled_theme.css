@@ -154,3 +154,19 @@ body.audio-only-mode ytmusic-player #song-video.ytmusic-player {
     pointer-events: none !important;
     height: 0 !important;
 }
+
+/*
+ * Native Player Architecture: Suppress web player UI elements
+ * (Preserves audio engine in DOM without visual or touch interference)
+ */
+ytmusic-player-bar {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+ytmusic-player-page {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
