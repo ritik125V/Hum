@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream
 class MusicWebViewClient(
     private val context: Context,
     private val audioCache: AudioDiskCache,
+    private val webResourceCache: WebResourceDiskCache,
     private val onPageLoaded: () -> Unit
 ) : WebViewClient() {
 
@@ -98,6 +99,12 @@ class MusicWebViewClient(
             }
         }
 
+        // 3. STATIC WEB RESOURCE DISK CACHE: Fast flash delivery for JS, CSS, fonts, SVG
+        val staticCached = webResourceCache.getCachedResponse(request)
+        if (staticCached != null) {
+            return staticCached
+        }
+
         return super.shouldInterceptRequest(view, request)
     }
 
@@ -105,6 +112,7 @@ class MusicWebViewClient(
         super.onPageStarted(view, url, favicon)
         if (view != null) {
             ScriptletInjector.injectAll(context, view)
+            applyAudioOnlyState(view)
         }
     }
 
@@ -113,8 +121,17 @@ class MusicWebViewClient(
         android.webkit.CookieManager.getInstance().flush()
         if (view != null) {
             ScriptletInjector.injectAll(context, view)
+            applyAudioOnlyState(view)
         }
         onPageLoaded()
+    }
+
+    private fun applyAudioOnlyState(view: WebView) {
+        if (settings.isAudioOnlyEnabled) {
+            view.evaluateJavascript("document.body && document.body.classList.add('audio-only-mode');", null)
+        } else {
+            view.evaluateJavascript("document.body && document.body.classList.remove('audio-only-mode');", null)
+        }
     }
 
     private fun createEmptyResponse(): WebResourceResponse {

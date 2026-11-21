@@ -31,11 +31,13 @@ import com.bravemusic.player.ui.SettingsBottomSheet
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
 import com.bravemusic.player.webview.MusicWebViewClient
+import com.bravemusic.player.webview.WebResourceDiskCache
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var audioCache: AudioDiskCache
+    private lateinit var webResourceCache: WebResourceDiskCache
     private lateinit var webChromeClient: MusicWebChromeClient
     private var playbackService: MediaPlaybackService? = null
     private var isServiceBound = false
@@ -68,6 +70,13 @@ class MainActivity : AppCompatActivity() {
         // 0. High display refresh rate (120Hz peak) & hardware acceleration
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.attributes.preferredRefreshRate = 120f
+            val modes = display?.supportedModes
+            val maxMode = modes?.maxByOrNull { it.refreshRate }
+            if (maxMode != null && maxMode.refreshRate > 60f) {
+                val params = window.attributes
+                params.preferredDisplayModeId = maxMode.modeId
+                window.attributes = params
+            }
         }
         window.setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
@@ -89,8 +98,27 @@ class MainActivity : AppCompatActivity() {
         // 2. Schedule daily background updates for Brave Shield rules
         BraveShieldSyncWorker.schedulePeriodicSync(applicationContext)
 
-        // 3. Initialize Audio Disk Cache for zero-data repeat plays
+        // 3. Initialize Audio & Static Web Disk Caches
         audioCache = AudioDiskCache(applicationContext)
+        webResourceCache = WebResourceDiskCache(applicationContext)
+
+        // Configure ServiceWorker caching & ad blocking
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                val swController = android.webkit.ServiceWorkerController.getInstance()
+                swController.setServiceWorkerClient(object : android.webkit.ServiceWorkerClient() {
+                    override fun shouldInterceptRequest(request: android.webkit.WebResourceRequest): android.webkit.WebResourceResponse? {
+                        val url = request.url?.toString() ?: return null
+                        if (BraveShield.shouldBlock(url, sourceUrl = "https://music.youtube.com", method = request.method ?: "GET")) {
+                            return android.webkit.WebResourceResponse("text/plain", "UTF-8", java.io.ByteArrayInputStream(ByteArray(0)))
+                        }
+                        return webResourceCache.getCachedResponse(request)
+                    }
+                })
+            } catch (e: Exception) {
+                android.util.Log.w("MainActivity", "ServiceWorkerController error: ${e.message}")
+            }
+        }
 
         // 4. Start & Bind Media Playback Service
         val serviceIntent = Intent(this, MediaPlaybackService::class.java)
@@ -137,8 +165,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         // Zero-latency direct window composition (LAYER_TYPE_NONE removes extra FBO copy latency)
+        binding.webView.setBackgroundColor(android.graphics.Color.BLACK)
         binding.webView.setLayerType(View.LAYER_TYPE_NONE, null)
-        binding.webView.overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
+        binding.webView.overScrollMode = View.OVER_SCROLL_NEVER
         binding.webView.isVerticalScrollBarEnabled = false
         binding.webView.isHorizontalScrollBarEnabled = false
         binding.webView.isHapticFeedbackEnabled = false
@@ -224,6 +253,7 @@ class MainActivity : AppCompatActivity() {
         binding.webView.webViewClient = MusicWebViewClient(
             context = applicationContext,
             audioCache = audioCache,
+            webResourceCache = webResourceCache,
             onPageLoaded = {
                 runOnUiThread {
                     webChromeClient.hideDropLoading()
@@ -376,6 +406,12 @@ class MainActivity : AppCompatActivity() {
         val settingsSheet = SettingsBottomSheet(
             onSettingsChanged = {
                 playbackService?.refreshMetadataFromSettings()
+                val isAudioOnly = com.bravemusic.player.utils.SettingsManager(applicationContext).isAudioOnlyEnabled
+                if (isAudioOnly) {
+                    executeJs("document.body && document.body.classList.add('audio-only-mode');")
+                } else {
+                    executeJs("document.body && document.body.classList.remove('audio-only-mode');")
+                }
             }
         )
         settingsSheet.show(supportFragmentManager, SettingsBottomSheet.TAG)

@@ -236,6 +236,12 @@
                 lastReportedTrackKey = trackKey;
                 notifyTrackChanged(title, artist || 'YouTube Music', 'YouTube Music', artwork);
             }
+
+            // Ensure miniplayer thumbnail is visible when a track is loaded
+            const miniThumb = pb ? pb.querySelector('.mweb-thumbnail-image-wrapper img') : null;
+            if (miniThumb && miniThumb.hasAttribute('hidden') && miniThumb.src) {
+                miniThumb.removeAttribute('hidden');
+            }
         } catch (err) {}
     }
 

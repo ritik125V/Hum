@@ -50,12 +50,17 @@ class SettingsBottomSheet(
         selectedIconKey = IconManager.normalizeKey(settings.appIcon)
 
         setupLauncherAndIcons()
+        setupAudioOnly()
         setupNotificationPlayer()
 
         // Apply
         binding.btnSaveSettings.setOnClickListener {
             saveAllSettings()
         }
+    }
+
+    private fun setupAudioOnly() {
+        binding.switchAudioOnly.isChecked = settings.isAudioOnlyEnabled
     }
 
     private fun setupLauncherAndIcons() {
@@ -105,6 +110,7 @@ class SettingsBottomSheet(
     }
 
     private fun saveAllSettings() {
+        settings.isAudioOnlyEnabled = binding.switchAudioOnly.isChecked
         settings.isCustomMetadataEnabled = binding.switchCustomMetadata.isChecked
         settings.customTitle = binding.etCustomTitle.text?.toString()?.ifEmpty { "Focus Audio" } ?: "Focus Audio"
         settings.customArtist = binding.etCustomArtist.text?.toString()?.ifEmpty { IconManager.APP_NAME } ?: IconManager.APP_NAME

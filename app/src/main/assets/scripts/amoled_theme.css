@@ -2,11 +2,13 @@
  * True AMOLED Theme & Natural Native Touch Physics for Modern Music Player
  * - Preserves Android native touch slop & tap-vs-scroll disambiguation
  * - Fluid kinetic scrolling matching Spotify & Chrome Mobile
- * - Removes tap highlight rectangles
+ * - Removes tap highlight rectangles and eliminates 300ms touch delay
+ * - Hardware GPU layer compositing for 60fps/120fps frame rates
  * - Clean class-based cosmetic ad hiding with zero overhead
  */
 html, body {
     background-color: #000000 !important;
+    background: #000000 !important;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -14,11 +16,68 @@ html, body {
     -webkit-tap-highlight-color: transparent !important;
 }
 
+/* Eliminate 300ms tap delay across interactive elements */
+button, a, tp-yt-paper-icon-button, yt-icon, ytmusic-play-button-renderer,
+ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer,
+ytmusic-pivot-bar-item-renderer, ytmusic-chip-cloud-chip-renderer {
+    touch-action: manipulation !important;
+}
+
 /* Ensure text inputs and search bars are fully focusable and trigger IME soft keyboard */
 input, textarea, [contenteditable="true"] {
     user-select: text !important;
     -webkit-user-select: text !important;
     pointer-events: auto !important;
+}
+
+/* True AMOLED Black Backgrounds across all container layers */
+ytmusic-app-layout,
+#browse-page,
+ytmusic-browse-response,
+ytmusic-player-page,
+ytmusic-player-bar,
+#nav-bar-background,
+#player-bar-background,
+ytmusic-section-list-renderer {
+    background-color: #000000 !important;
+    background: #000000 !important;
+}
+
+/* 
+ * Hardware-Accelerated GPU Layer Promotion & Containment
+ * Forces Chromium compositor to offload scrolling and layout to GPU
+ */
+#browse-page,
+ytmusic-app-layout,
+ytmusic-section-list-renderer,
+#contents.ytmusic-section-list-renderer {
+    contain: layout style;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+ytmusic-carousel,
+ytmusic-carousel-shelf-renderer,
+#items.ytmusic-carousel-shelf-renderer {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    contain: layout;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* 
+ * Eliminate Expensive Backdrop Filters
+ * Disabling real-time blur passes prevents frame drops on mobile GPUs
+ */
+ytmusic-nav-bar,
+#nav-bar-background,
+ytmusic-player-bar,
+#player-bar-background,
+.immersive-background,
+ytmusic-item-thumbnail-overlay-renderer {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 /* 
@@ -39,6 +98,18 @@ ytmusic-popup-container,
 tp-yt-iron-dropdown[opened],
 ytmusic-menu-popup-renderer {
     z-index: 10000 !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* 
+ * Audio-Only Mode: Suppress heavy video rendering for maximum battery and data saving
+ */
+body.audio-only-mode #song-video {
+    visibility: hidden !important;
+}
+body.audio-only-mode #song-image {
+    display: block !important;
 }
 
 /* 
@@ -81,7 +152,6 @@ yt-icon[icon*="youtube" i] {
  * Hide Empty Thumbnail Placeholder & Inactive Player Bar when No Song is Playing
  * (Eliminates the empty rectangular black box on the bottom left)
  */
-.mweb-thumbnail-image-wrapper:has(img[hidden]),
 .mweb-thumbnail-image-wrapper:has(img[src=""]),
 .mweb-thumbnail-image-wrapper:has(img:not([src])),
 ytmusic-player-bar[inert],
