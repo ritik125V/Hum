@@ -1,5 +1,7 @@
 package com.bravemusic.player.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -52,10 +54,25 @@ class SettingsBottomSheet(
         setupLauncherAndIcons()
         setupAudioOnly()
         setupNotificationPlayer()
+        setupUpdatesSection()
 
         // Apply
         binding.btnSaveSettings.setOnClickListener {
             saveAllSettings()
+        }
+    }
+
+    private fun setupUpdatesSection() {
+        binding.tvCurrentVersion.text = "v${com.bravemusic.player.BuildConfig.VERSION_NAME}"
+        binding.btnCheckForUpdates.setOnClickListener {
+            val currentVersion = com.bravemusic.player.BuildConfig.VERSION_NAME
+            val updateUrl = "https://hum.r8r.in/?version=$currentVersion"
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Opening update link...", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "versionCode": 1,
+  "releaseDate": "November 2026",
+  "apkUrl": "app-release.apk",
+  "apkSize": "4.8 MB",
+  "minAndroid": "8.0+",
+  "githubReleaseUrl": "https://github.com/ritik125V/Hum/releases/latest",
+  "githubRepoUrl": "https://github.com/ritik125V/Hum",
+  "highlights": [
+    "Accelerated pre-cached WebView architecture with zero cipher risk",
+    "GPU hardware layer compositing & 120Hz display refresh support",
+    "Audio-Only Mode toggle in settings to suppress video and save 80% data",
+    "True AMOLED pure pitch black theme",
+    "Built-in Ad-block & Background Playback"
+  ]
+}

@@ -597,6 +597,119 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Update Status Banner */
+        #update-status-container {
+            scroll-margin-top: 85px;
+        }
+
+        .update-banner {
+            margin-top: 28px;
+            margin-bottom: 24px;
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            animation: fadeInDown 0.35s ease;
+        }
+
+        .update-banner-success {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(17, 19, 25, 0.95));
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.2);
+        }
+
+        .update-banner-alert {
+            background: linear-gradient(135deg, rgba(51, 107, 255, 0.16), rgba(17, 19, 25, 0.95));
+            border: 1px solid rgba(51, 107, 255, 0.45);
+            box-shadow: 0 10px 30px -10px rgba(51, 107, 255, 0.3);
+        }
+
+        .update-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .update-banner-success .update-icon {
+            background: rgba(34, 197, 94, 0.18);
+            color: #22C55E;
+        }
+
+        .update-banner-alert .update-icon {
+            background: rgba(51, 107, 255, 0.2);
+            color: #336BFF;
+        }
+
+        .update-body {
+            flex: 1;
+        }
+
+        .update-tag {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .update-tag-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ADE80;
+        }
+
+        .update-tag-alert {
+            background: rgba(51, 107, 255, 0.22);
+            color: #60A5FA;
+        }
+
+        .update-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .update-desc {
+            font-size: 0.92rem;
+            color: var(--text-medium);
+            line-height: 1.5;
+        }
+
+        .update-code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #FFFFFF;
+        }
+
+        .update-actions {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -626,6 +739,9 @@
     </header>
 
     <main>
+        <!-- Dynamic App Update Check Status Banner -->
+        <div class="container" id="update-status-container" style="display: none;"></div>
+
         <!-- Hero Section -->
         <section class="hero container">
             <div class="badge">
@@ -910,6 +1026,113 @@
                 } catch (e) {}
             });
         });
+    </script>
+
+    <!-- Update Version Checker -->
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const userVersion = params.get('version') || params.get('v');
+            if (!userVersion) return;
+
+            const container = document.getElementById('update-status-container');
+            if (!container) return;
+
+            function parseSemVer(ver) {
+                if (!ver) return [0, 0, 0];
+                return ver.replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+            }
+
+            function compareVersions(v1, v2) {
+                const p1 = parseSemVer(v1);
+                const p2 = parseSemVer(v2);
+                for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+                    const num1 = p1[i] || 0;
+                    const num2 = p2[i] || 0;
+                    if (num1 > num2) return 1;
+                    if (num1 < num2) return -1;
+                }
+                return 0;
+            }
+
+            function renderUpdateUI(latest) {
+                const latestVersion = latest.version || '1.0.0';
+                const apkUrl = latest.apkUrl || 'app-release.apk';
+                const apkSize = latest.apkSize || '4.8 MB';
+                const githubUrl = latest.githubReleaseUrl || 'https://github.com/ritik125V/Hum/releases/latest';
+
+                const cmp = compareVersions(userVersion, latestVersion);
+                container.style.display = 'block';
+
+                if (cmp >= 0) {
+                    // Up to date
+                    container.innerHTML = `
+                        <div class="update-banner update-banner-success">
+                            <div class="update-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div class="update-body">
+                                <span class="update-tag update-tag-success">You are up to date</span>
+                                <h3 class="update-title">Hum v${userVersion} is the latest version</h3>
+                                <p class="update-desc">Your installed app is completely up to date with the latest code deployed on the main branch.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Update available
+                    container.innerHTML = `
+                        <div class="update-banner update-banner-alert">
+                            <div class="update-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </div>
+                            <div class="update-body">
+                                <span class="update-tag update-tag-alert">Update Available</span>
+                                <h3 class="update-title">A new version of Hum is available!</h3>
+                                <p class="update-desc">
+                                    Your installed version is <span class="update-code">v${userVersion}</span>. 
+                                    The latest release on the main branch is <span class="update-code">v${latestVersion}</span>.
+                                </p>
+                                <div class="update-actions">
+                                    <a href="${apkUrl}" download="Hum-v${latestVersion}.apk" class="btn btn-primary btn-sm">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        Download Latest APK (${apkSize})
+                                    </a>
+                                    <a href="${githubUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+                                        View Latest Code on GitHub
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Fetch live version info or use fallback
+            fetch('version.json?t=' + Date.now())
+                .then(res => res.json())
+                .then(data => renderUpdateUI(data))
+                .catch(() => {
+                    renderUpdateUI({
+                        version: '1.0.0',
+                        apkUrl: 'app-release.apk',
+                        apkSize: '4.8 MB',
+                        githubReleaseUrl: 'https://github.com/ritik125V/Hum/releases/latest'
+                    });
+                });
+        })();
     </script>
 
     <!-- Cloudflare Web Analytics -->
