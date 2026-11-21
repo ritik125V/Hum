@@ -67,7 +67,14 @@
                 if (songImage) {
                     let img = songImage.querySelector('img#img') || songImage.querySelector('img');
                     if (img && (!img.src || img.src.startsWith('data:') || img.src === window.location.href)) {
-                        const artwork = extractBestArtwork(null);
+                        let artwork = extractBestArtwork(null);
+                        if (!artwork) {
+                            const mp = document.getElementById('movie_player');
+                            const vd = (mp && typeof mp.getVideoData === 'function') ? mp.getVideoData() : null;
+                            if (vd && vd.video_id) {
+                                artwork = 'https://i.ytimg.com/vi/' + vd.video_id + '/hqdefault.jpg';
+                            }
+                        }
                         if (artwork) {
                             img.src = artwork;
                         }

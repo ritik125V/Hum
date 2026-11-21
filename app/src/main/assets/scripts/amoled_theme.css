@@ -81,7 +81,6 @@ yt-icon[icon*="youtube" i] {
  * Hide Empty Thumbnail Placeholder & Inactive Player Bar when No Song is Playing
  * (Eliminates the empty rectangular black box on the bottom left)
  */
-.mweb-thumbnail-image-wrapper:has(img[hidden]),
 .mweb-thumbnail-image-wrapper:has(img[src=""]),
 .mweb-thumbnail-image-wrapper:has(img:not([src])),
 ytmusic-player-bar[inert],
@@ -143,17 +142,15 @@ tp-yt-paper-dialog:has(ytmusic-mealbar-promo-renderer) {
 }
 
 /*
- * Audio-Only Mode: Suppress video rendering in the full player and show album artwork
- * Strictly scoped to FULL_PLAYER_VIEW so home, browse, and miniplayer are never affected
+ * Audio-Only Mode: Suppress video rendering and display high-res album artwork
  */
-body.audio-only-mode ytmusic-player-page[player-page-ui-state="FULL_PLAYER_VIEW"] #song-video {
+body.audio-only-mode ytmusic-player #song-image.ytmusic-player {
+    display: block !important;
+}
+
+body.audio-only-mode ytmusic-player #song-video.ytmusic-player {
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
-}
-
-body.audio-only-mode ytmusic-player-page[player-page-ui-state="FULL_PLAYER_VIEW"] #song-image[hidden] {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    height: 0 !important;
 }
