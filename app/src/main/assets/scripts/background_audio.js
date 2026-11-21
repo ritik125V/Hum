@@ -61,36 +61,12 @@
                 }
             } catch (e) {}
 
-            // Ensure #song-video is suppressed
+            // Ensure #song-image img has artwork if empty
             try {
-                const songVideo = document.getElementById('song-video') || document.querySelector('ytmusic-player #song-video');
-                if (songVideo) {
-                    songVideo.style.visibility = 'hidden';
-                    songVideo.style.opacity = '0';
-                    songVideo.style.pointerEvents = 'none';
-                }
-            } catch (e) {}
-
-            // Ensure #song-image is unhidden, styled, and populated with album art / thumbnail
-            try {
-                const songImage = document.getElementById('song-image') || document.querySelector('ytmusic-player #song-image');
+                const songImage = document.getElementById('song-image');
                 if (songImage) {
-                    songImage.removeAttribute('hidden');
-                    songImage.style.display = 'flex';
-                    songImage.style.visibility = 'visible';
-                    songImage.style.opacity = '1';
                     let img = songImage.querySelector('img#img') || songImage.querySelector('img');
-                    if (!img) {
-                        img = document.createElement('img');
-                        img.id = 'img';
-                        img.className = 'style-scope yt-img-shadow';
-                        songImage.appendChild(img);
-                    }
-                    img.removeAttribute('hidden');
-                    img.style.display = 'block';
-                    img.style.visibility = 'visible';
-                    img.style.opacity = '1';
-                    if (!img.src || img.src.startsWith('data:') || img.src === window.location.href) {
+                    if (img && (!img.src || img.src.startsWith('data:') || img.src === window.location.href)) {
                         const artwork = extractBestArtwork(null);
                         if (artwork) {
                             img.src = artwork;
@@ -101,22 +77,6 @@
         } else {
             if (html) html.classList.remove('audio-only-mode');
             if (body) body.classList.remove('audio-only-mode');
-
-            // Restore video and image styles
-            try {
-                const songVideo = document.getElementById('song-video') || document.querySelector('ytmusic-player #song-video');
-                if (songVideo) {
-                    songVideo.style.visibility = '';
-                    songVideo.style.opacity = '';
-                    songVideo.style.pointerEvents = '';
-                }
-                const songImage = document.getElementById('song-image') || document.querySelector('ytmusic-player #song-image');
-                if (songImage) {
-                    songImage.style.display = '';
-                    songImage.style.visibility = '';
-                    songImage.style.opacity = '';
-                }
-            } catch (e) {}
 
             // Restore normal playback quality
             try {
