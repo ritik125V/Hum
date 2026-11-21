@@ -156,9 +156,18 @@ body.audio-only-mode ytmusic-player #song-video.ytmusic-player {
 }
 
 /*
- * Native Player Architecture: Suppress web player UI elements
- * (Preserves audio engine in DOM without visual or touch interference)
+ * Native Player & Header Architecture: Suppress web player UI and web header
+ * (Preserves audio engine and action triggers in DOM without visual or touch interference)
  */
+ytmusic-nav-bar {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 ytmusic-player-bar {
     display: none !important;
     visibility: hidden !important;
@@ -169,4 +178,8 @@ ytmusic-player-page {
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
+}
+
+#browse-page, ytmusic-browse-response, #content {
+    padding-bottom: 76px !important;
 }

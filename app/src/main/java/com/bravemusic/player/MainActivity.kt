@@ -22,30 +22,23 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import com.bravemusic.player.adblock.BraveShield
 import com.bravemusic.player.adblock.BraveShieldSyncWorker
-import com.bravemusic.player.data.feed.FeedCacheRepository
 import com.bravemusic.player.databinding.ActivityMainBinding
 import com.bravemusic.player.playback.AudioDiskCache
 import com.bravemusic.player.playback.MediaPlaybackService
 import com.bravemusic.player.ui.PlayerBottomSheetController
 import com.bravemusic.player.ui.SettingsBottomSheet
-import com.bravemusic.player.ui.feed.FeedSectionAdapter
 import com.bravemusic.player.databinding.LayoutPlayerBottomSheetBinding
 import com.bravemusic.player.utils.SettingsManager
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
 import com.bravemusic.player.webview.MusicWebViewClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var playerController: PlayerBottomSheetController
-    private lateinit var feedRepository: FeedCacheRepository
-    private lateinit var feedAdapter: FeedSectionAdapter
     private lateinit var audioCache: AudioDiskCache
     private lateinit var settings: SettingsManager
     private lateinit var webChromeClient: MusicWebChromeClient
@@ -117,10 +110,13 @@ class MainActivity : AppCompatActivity() {
         android.webkit.WebView.setWebContentsDebuggingEnabled(true)
         setupWebView()
 
-        // 7. Setup Slide-in / Slide-out Edge Navigation Drawer
-        setupEdgeDrawer()
+        // 7. Setup Instant Hardcoded Native Navigation Bar (Header)
+        setupNavBar()
 
-        // 8. Setup Native BottomSheet Player Controller
+        // 8. Setup Native Slide-in Left Navigation Sidebar Drawer
+        setupLeftDrawer()
+
+        // 9. Setup Native BottomSheet Player Controller
         playerController = PlayerBottomSheetController(
             binding = binding.layoutPlayerSheet,
             onPlayPauseAction = {
@@ -140,18 +136,13 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        // 9. Setup Native Home Feed (0ms Cold Start & SWR Caching)
-        setupNativeFeed()
-
-        // 10. Setup Back Press Handling: Player collapse, drawer close, native feed restore, and history navigation
+        // 10. Setup Back Press Handling: Drawer close, Player collapse, and Web history navigation
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (isDrawerOpen) {
                     closeDrawer()
                 } else if (playerController.collapse()) {
                     // Collapsed native player sheet
-                } else if (binding.nativeHomeContainer.visibility != View.VISIBLE) {
-                    binding.nativeHomeContainer.visibility = View.VISIBLE
                 } else if (binding.webView.canGoBack()) {
                     binding.webView.goBack()
                 } else {
@@ -160,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 10. Load YouTube Music Mobile (cold start only)
+        // 11. Load YouTube Music Mobile (cold start only)
         if (savedInstanceState == null) {
             binding.webView.loadUrl("https://music.youtube.com")
         }
@@ -261,17 +252,6 @@ class MainActivity : AppCompatActivity() {
                     runOnUiThread {
                         playerController.updateProgress(currentSeconds, totalSeconds)
                     }
-                },
-                onHomeFeedLoadedCallback = { feedJson ->
-                    val sections = feedRepository.parseFeedJson(feedJson)
-                    if (sections.isNotEmpty()) {
-                        runOnUiThread {
-                            feedAdapter.updateSections(sections)
-                        }
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            feedRepository.saveFeedCache(feedJson)
-                        }
-                    }
                 }
             ),
             "BraveMusicBridge"
@@ -299,82 +279,115 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupEdgeDrawer() {
-        val density = resources.displayMetrics.density
-        // Dock width (52dp dock + 1dp separator) = 53dp
-        val dockWidth = 53f * density
-        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
-
-        // Initialize collapsed offscreen to the RIGHT
-        binding.drawerContainer.post {
-            binding.drawerContainer.translationX = dockWidth
+    private fun setupNavBar() {
+        binding.layoutNavBar.btnNavGuide.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            openDrawer()
         }
 
-        var startX = 0f
-        var isDragging = false
+        binding.layoutNavBar.btnNavBrand.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            navigateHome()
+        }
 
-        binding.btnDrawerToggle.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    startX = event.rawX
-                    isDragging = false
+        binding.layoutNavBar.btnNavSearch.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            executeJs("const s = document.querySelector('ytmusic-search-box .search-button, ytmusic-search-box button, ytmusic-search-box [aria-label*=\"Search\" i]'); if (s) s.click(); else { window.location.href = 'https://music.youtube.com/search'; }")
+        }
+
+        binding.layoutNavBar.btnNavSignIn.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            executeJs("const signin = document.querySelector('.sign-in-link, a[href*=\"accounts.google.com\"], [aria-label*=\"Sign in\" i]'); if (signin) signin.click(); else { window.location.href = 'https://accounts.google.com/ServiceLogin?service=youtube'; }")
+        }
+
+        binding.layoutNavBar.btnNavMore.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            showThreeDotMenu(view)
+        }
+    }
+
+    private fun showThreeDotMenu(anchor: View) {
+        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
+        popup.menuInflater.inflate(R.menu.menu_ytmusic_more, popup.menu)
+        popup.menu.findItem(R.id.menu_audio_only)?.isChecked = settings.isAudioOnlyEnabled
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_settings -> {
+                    openSettings()
                     true
                 }
-                MotionEvent.ACTION_MOVE -> {
-                    val deltaX = event.rawX - startX
-                    if (!isDragging && Math.abs(deltaX) > touchSlop) {
-                        isDragging = true
-                    }
-                    if (isDragging) {
-                        val base = if (isDrawerOpen) 0f else dockWidth
-                        val newTransX = (base + deltaX).coerceIn(0f, dockWidth)
-                        binding.drawerContainer.translationX = newTransX
-                        val progress = 1f - (newTransX / dockWidth)
-                        binding.drawerScrim.visibility = View.VISIBLE
-                        binding.drawerScrim.alpha = progress * 0.8f
-                        binding.ivDrawerChevron.rotation = progress * 180f
-                    }
+                R.id.menu_audio_only -> {
+                    val newMode = !settings.isAudioOnlyEnabled
+                    settings.isAudioOnlyEnabled = newMode
+                    menuItem.isChecked = newMode
+                    applyAudioOnlyMode()
                     true
                 }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    if (!isDragging) {
-                        v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        toggleDrawer()
-                    } else {
-                        val currentTransX = binding.drawerContainer.translationX
-                        if (currentTransX < dockWidth * 0.5f) {
-                            openDrawer()
-                        } else {
-                            closeDrawer()
-                        }
-                    }
+                R.id.menu_history -> {
+                    executeJs("window.location.href = 'https://music.youtube.com/history';")
+                    true
+                }
+                R.id.menu_reload -> {
+                    binding.webView.reload()
+                    true
+                }
+                R.id.menu_about -> {
+                    openSettings()
                     true
                 }
                 else -> false
             }
+        }
+        popup.show()
+    }
+
+    private fun setupLeftDrawer() {
+        val drawerWidth = 280f * resources.displayMetrics.density
+
+        // Initialize collapsed offscreen to the LEFT
+        binding.drawerContainer.post {
+            binding.drawerContainer.translationX = -drawerWidth
         }
 
         binding.drawerScrim.setOnClickListener {
             closeDrawer()
         }
 
-        binding.btnDrawerHome.setOnClickListener {
+        binding.layoutDrawer.drawerItemHome.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            it.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction {
-                it.animate().scaleX(1.0f).scaleY(1.0f).setDuration(90).start()
-                closeDrawer()
-                navigateHome()
-            }.start()
+            closeDrawer()
+            navigateHome()
         }
 
-        binding.btnDrawerSettings.setOnClickListener {
+        binding.layoutDrawer.drawerItemExplore.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            it.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction {
-                it.animate().scaleX(1.0f).scaleY(1.0f).setDuration(90).start()
-                closeDrawer()
-                openSettings()
-            }.start()
+            closeDrawer()
+            executeJs("window.location.href = 'https://music.youtube.com/explore';")
+        }
+
+        binding.layoutDrawer.drawerItemLibrary.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            closeDrawer()
+            executeJs("window.location.href = 'https://music.youtube.com/library';")
+        }
+
+        binding.layoutDrawer.drawerItemHistory.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            closeDrawer()
+            executeJs("window.location.href = 'https://music.youtube.com/history';")
+        }
+
+        binding.layoutDrawer.drawerItemSettings.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            closeDrawer()
+            openSettings()
+        }
+
+        binding.layoutDrawer.drawerItemShields.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            closeDrawer()
+            openSettings()
         }
     }
 
@@ -383,89 +396,35 @@ class MainActivity : AppCompatActivity() {
         isDrawerOpen = true
         binding.drawerScrim.visibility = View.VISIBLE
         binding.drawerScrim.alpha = 0f
-        binding.drawerScrim.animate()
-            .alpha(1f)
-            .setDuration(220)
-            .start()
+        binding.drawerScrim.animate().alpha(1f).setDuration(220).start()
 
         binding.drawerContainer.animate()
             .translationX(0f)
-            .setDuration(240)
-            .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
-            .start()
-
-        binding.ivDrawerChevron.animate()
-            .rotation(180f)
-            .setDuration(240)
+            .setDuration(250)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
             .start()
     }
 
     private fun closeDrawer() {
         if (!isDrawerOpen) return
         isDrawerOpen = false
+        val drawerWidth = 280f * resources.displayMetrics.density
         binding.drawerScrim.animate()
             .alpha(0f)
             .setDuration(180)
             .withEndAction { binding.drawerScrim.visibility = View.GONE }
             .start()
 
-        val dockWidth = 53f * resources.displayMetrics.density
         binding.drawerContainer.animate()
-            .translationX(dockWidth)
-            .setDuration(200)
-            .setInterpolator(android.view.animation.AccelerateInterpolator(1.2f))
+            .translationX(-drawerWidth)
+            .setDuration(220)
+            .setInterpolator(android.view.animation.AccelerateInterpolator())
             .start()
-
-        binding.ivDrawerChevron.animate()
-            .rotation(0f)
-            .setDuration(200)
-            .start()
-    }
-
-    private fun toggleDrawer() {
-        if (isDrawerOpen) closeDrawer() else openDrawer()
     }
 
     private fun navigateHome() {
-        binding.nativeHomeContainer.visibility = View.VISIBLE
-        binding.rvHomeFeed.smoothScrollToPosition(0)
         webChromeClient.showDropLoading()
         executeJs("if (window.BraveMusicControls && window.BraveMusicControls.goHome) { window.BraveMusicControls.goHome(); } else { window.location.href = 'https://music.youtube.com/'; }")
-    }
-
-    private fun setupNativeFeed() {
-        feedRepository = FeedCacheRepository(applicationContext)
-        feedAdapter = FeedSectionAdapter { item ->
-            // Immediate visual feedback (0ms latency)
-            playerController.updateTrack(item.title, item.subtitle, item.thumbnailUrl)
-
-            // Dispatch playback action to web engine
-            val js = "if (window.BraveMusicControls && window.BraveMusicControls.playTrack) { " +
-                    "window.BraveMusicControls.playTrack('${item.videoId ?: ""}', '${item.playlistId ?: ""}'); " +
-                    "} else { " +
-                    "window.location.href = 'https://music.youtube.com/watch?v=${item.videoId ?: ""}'; }"
-            executeJs(js)
-        }
-
-        binding.rvHomeFeed.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        binding.rvHomeFeed.adapter = feedAdapter
-        binding.rvHomeFeed.setHasFixedSize(false)
-
-        // Instant 0ms Cold Start: Load cached feed synchronously from disk
-        val cached = feedRepository.getCachedFeed()
-        feedAdapter.updateSections(cached)
-
-        // Top Bar Actions
-        binding.btnTopSettings.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            openSettings()
-        }
-
-        binding.btnTopSearch.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            binding.nativeHomeContainer.visibility = View.GONE
-            executeJs("const searchBtn = document.querySelector('ytmusic-search-box, [aria-label*=\"Search\" i]'); if (searchBtn) searchBtn.click();")
-        }
     }
 
     private fun openSettings() {
