@@ -27,10 +27,7 @@ import com.bravemusic.player.adblock.BraveShieldSyncWorker
 import com.bravemusic.player.databinding.ActivityMainBinding
 import com.bravemusic.player.playback.AudioDiskCache
 import com.bravemusic.player.playback.MediaPlaybackService
-import com.bravemusic.player.ui.PlayerBottomSheetController
 import com.bravemusic.player.ui.SettingsBottomSheet
-import com.bravemusic.player.databinding.LayoutPlayerBottomSheetBinding
-import com.bravemusic.player.utils.SettingsManager
 import com.bravemusic.player.webview.BraveMusicBridge
 import com.bravemusic.player.webview.MusicWebChromeClient
 import com.bravemusic.player.webview.MusicWebViewClient
@@ -38,9 +35,7 @@ import com.bravemusic.player.webview.MusicWebViewClient
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var playerController: PlayerBottomSheetController
     private lateinit var audioCache: AudioDiskCache
-    private lateinit var settings: SettingsManager
     private lateinit var webChromeClient: MusicWebChromeClient
     private var playbackService: MediaPlaybackService? = null
     private var isServiceBound = false
@@ -96,7 +91,6 @@ class MainActivity : AppCompatActivity() {
 
         // 3. Initialize Audio Disk Cache for zero-data repeat plays
         audioCache = AudioDiskCache(applicationContext)
-        settings = SettingsManager(applicationContext)
 
         // 4. Start & Bind Media Playback Service
         val serviceIntent = Intent(this, MediaPlaybackService::class.java)
@@ -110,39 +104,17 @@ class MainActivity : AppCompatActivity() {
         android.webkit.WebView.setWebContentsDebuggingEnabled(true)
         setupWebView()
 
-        // 7. Setup Instant Hardcoded Native Navigation Bar (Header)
-        setupNavBar()
+        // 7. Setup Slide-in / Slide-out Edge Navigation Drawer
+        setupEdgeDrawer()
 
-        // 8. Setup Native Slide-in Left Navigation Sidebar Drawer
-        setupLeftDrawer()
-
-        // 9. Setup Native BottomSheet Player Controller
-        playerController = PlayerBottomSheetController(
-            binding = binding.layoutPlayerSheet,
-            onPlayPauseAction = {
-                executeJs("if (window.BraveMusicControls) { const v = document.querySelector('video'); if (v && !v.paused) window.BraveMusicControls.pause(); else window.BraveMusicControls.play(); }")
-            },
-            onNextAction = {
-                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.next) window.BraveMusicControls.next();")
-            },
-            onPreviousAction = {
-                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.previous) window.BraveMusicControls.previous();")
-            },
-            onSeekAction = { seconds ->
-                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.seekTo) window.BraveMusicControls.seekTo($seconds);")
-            },
-            onCollapseAction = {
-                executeJs("if (window.BraveMusicControls && window.BraveMusicControls.collapsePlayer) window.BraveMusicControls.collapsePlayer();")
-            }
-        )
-
-        // 10. Setup Back Press Handling: Drawer close, Player collapse, and Web history navigation
+        // 8. Setup Back Press Handling: Player collapse, drawer close, and history navigation
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (isDrawerOpen) {
                     closeDrawer()
-                } else if (playerController.collapse()) {
-                    // Collapsed native player sheet
+                } else if (isPlayerExpanded) {
+                    isPlayerExpanded = false
+                    executeJs("if (window.BraveMusicControls && window.BraveMusicControls.collapsePlayer) window.BraveMusicControls.collapsePlayer();")
                 } else if (binding.webView.canGoBack()) {
                     binding.webView.goBack()
                 } else {
@@ -151,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 11. Load YouTube Music Mobile (cold start only)
+        // 10. Load YouTube Music Mobile (cold start only)
         if (savedInstanceState == null) {
             binding.webView.loadUrl("https://music.youtube.com")
         }
@@ -220,13 +192,11 @@ class MainActivity : AppCompatActivity() {
                 onTrackChangedCallback = { title, artist, album, artworkUrl ->
                     runOnUiThread {
                         playbackService?.updateMetadata(title, artist, album, artworkUrl)
-                        playerController.updateTrack(title, artist, artworkUrl)
                     }
                 },
                 onPlaybackStateCallback = { isPlaying ->
                     runOnUiThread {
                         playbackService?.updatePlaybackState(isPlaying)
-                        playerController.updatePlaybackState(isPlaying)
                     }
                 },
                 onPlayerStateCallback = { isExpanded ->
@@ -244,14 +214,6 @@ class MainActivity : AppCompatActivity() {
                         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
                         imm?.hideSoftInputFromWindow(binding.webView.windowToken, 0)
                     }
-                },
-                isAudioOnlyCallback = {
-                    settings.isAudioOnlyEnabled
-                },
-                onProgressCallback = { currentSeconds, totalSeconds ->
-                    runOnUiThread {
-                        playerController.updateProgress(currentSeconds, totalSeconds)
-                    }
                 }
             ),
             "BraveMusicBridge"
@@ -265,7 +227,6 @@ class MainActivity : AppCompatActivity() {
             onPageLoaded = {
                 runOnUiThread {
                     webChromeClient.hideDropLoading()
-                    applyAudioOnlyMode()
                 }
             }
         )
@@ -279,115 +240,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupNavBar() {
-        binding.layoutNavBar.btnNavGuide.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            openDrawer()
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupEdgeDrawer() {
+        val density = resources.displayMetrics.density
+        // Dock width (52dp dock + 1dp separator) = 53dp
+        val dockWidth = 53f * density
+        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
+
+        // Initialize collapsed offscreen to the RIGHT
+        binding.drawerContainer.post {
+            binding.drawerContainer.translationX = dockWidth
         }
 
-        binding.layoutNavBar.btnNavBrand.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            navigateHome()
-        }
+        var startX = 0f
+        var isDragging = false
 
-        binding.layoutNavBar.btnNavSearch.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            executeJs("const s = document.querySelector('ytmusic-search-box .search-button, ytmusic-search-box button, ytmusic-search-box [aria-label*=\"Search\" i]'); if (s) s.click(); else { window.location.href = 'https://music.youtube.com/search'; }")
-        }
-
-        binding.layoutNavBar.btnNavSignIn.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            executeJs("const signin = document.querySelector('.sign-in-link, a[href*=\"accounts.google.com\"], [aria-label*=\"Sign in\" i]'); if (signin) signin.click(); else { window.location.href = 'https://accounts.google.com/ServiceLogin?service=youtube'; }")
-        }
-
-        binding.layoutNavBar.btnNavMore.setOnClickListener { view ->
-            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            showThreeDotMenu(view)
-        }
-    }
-
-    private fun showThreeDotMenu(anchor: View) {
-        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
-        popup.menuInflater.inflate(R.menu.menu_ytmusic_more, popup.menu)
-        popup.menu.findItem(R.id.menu_audio_only)?.isChecked = settings.isAudioOnlyEnabled
-
-        popup.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.menu_settings -> {
-                    openSettings()
+        binding.btnDrawerToggle.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = event.rawX
+                    isDragging = false
                     true
                 }
-                R.id.menu_audio_only -> {
-                    val newMode = !settings.isAudioOnlyEnabled
-                    settings.isAudioOnlyEnabled = newMode
-                    menuItem.isChecked = newMode
-                    applyAudioOnlyMode()
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = event.rawX - startX
+                    if (!isDragging && Math.abs(deltaX) > touchSlop) {
+                        isDragging = true
+                    }
+                    if (isDragging) {
+                        val base = if (isDrawerOpen) 0f else dockWidth
+                        val newTransX = (base + deltaX).coerceIn(0f, dockWidth)
+                        binding.drawerContainer.translationX = newTransX
+                        val progress = 1f - (newTransX / dockWidth)
+                        binding.drawerScrim.visibility = View.VISIBLE
+                        binding.drawerScrim.alpha = progress * 0.8f
+                        binding.ivDrawerChevron.rotation = progress * 180f
+                    }
                     true
                 }
-                R.id.menu_history -> {
-                    executeJs("window.location.href = 'https://music.youtube.com/history';")
-                    true
-                }
-                R.id.menu_reload -> {
-                    binding.webView.reload()
-                    true
-                }
-                R.id.menu_about -> {
-                    openSettings()
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (!isDragging) {
+                        v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        toggleDrawer()
+                    } else {
+                        val currentTransX = binding.drawerContainer.translationX
+                        if (currentTransX < dockWidth * 0.5f) {
+                            openDrawer()
+                        } else {
+                            closeDrawer()
+                        }
+                    }
                     true
                 }
                 else -> false
             }
-        }
-        popup.show()
-    }
-
-    private fun setupLeftDrawer() {
-        val drawerWidth = 280f * resources.displayMetrics.density
-
-        // Initialize collapsed offscreen to the LEFT
-        binding.drawerContainer.post {
-            binding.drawerContainer.translationX = -drawerWidth
         }
 
         binding.drawerScrim.setOnClickListener {
             closeDrawer()
         }
 
-        binding.layoutDrawer.drawerItemHome.setOnClickListener {
+        binding.btnDrawerHome.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            navigateHome()
+            it.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction {
+                it.animate().scaleX(1.0f).scaleY(1.0f).setDuration(90).start()
+                closeDrawer()
+                navigateHome()
+            }.start()
         }
 
-        binding.layoutDrawer.drawerItemExplore.setOnClickListener {
+        binding.btnDrawerSettings.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            executeJs("window.location.href = 'https://music.youtube.com/explore';")
-        }
-
-        binding.layoutDrawer.drawerItemLibrary.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            executeJs("window.location.href = 'https://music.youtube.com/library';")
-        }
-
-        binding.layoutDrawer.drawerItemHistory.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            executeJs("window.location.href = 'https://music.youtube.com/history';")
-        }
-
-        binding.layoutDrawer.drawerItemSettings.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            openSettings()
-        }
-
-        binding.layoutDrawer.drawerItemShields.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            closeDrawer()
-            openSettings()
+            it.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction {
+                it.animate().scaleX(1.0f).scaleY(1.0f).setDuration(90).start()
+                closeDrawer()
+                openSettings()
+            }.start()
         }
     }
 
@@ -396,30 +324,47 @@ class MainActivity : AppCompatActivity() {
         isDrawerOpen = true
         binding.drawerScrim.visibility = View.VISIBLE
         binding.drawerScrim.alpha = 0f
-        binding.drawerScrim.animate().alpha(1f).setDuration(220).start()
+        binding.drawerScrim.animate()
+            .alpha(1f)
+            .setDuration(220)
+            .start()
 
         binding.drawerContainer.animate()
             .translationX(0f)
-            .setDuration(250)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .setDuration(240)
+            .setInterpolator(android.view.animation.OvershootInterpolator(1.1f))
+            .start()
+
+        binding.ivDrawerChevron.animate()
+            .rotation(180f)
+            .setDuration(240)
             .start()
     }
 
     private fun closeDrawer() {
         if (!isDrawerOpen) return
         isDrawerOpen = false
-        val drawerWidth = 280f * resources.displayMetrics.density
         binding.drawerScrim.animate()
             .alpha(0f)
             .setDuration(180)
             .withEndAction { binding.drawerScrim.visibility = View.GONE }
             .start()
 
+        val dockWidth = 53f * resources.displayMetrics.density
         binding.drawerContainer.animate()
-            .translationX(-drawerWidth)
-            .setDuration(220)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
+            .translationX(dockWidth)
+            .setDuration(200)
+            .setInterpolator(android.view.animation.AccelerateInterpolator(1.2f))
             .start()
+
+        binding.ivDrawerChevron.animate()
+            .rotation(0f)
+            .setDuration(200)
+            .start()
+    }
+
+    private fun toggleDrawer() {
+        if (isDrawerOpen) closeDrawer() else openDrawer()
     }
 
     private fun navigateHome() {
@@ -431,15 +376,9 @@ class MainActivity : AppCompatActivity() {
         val settingsSheet = SettingsBottomSheet(
             onSettingsChanged = {
                 playbackService?.refreshMetadataFromSettings()
-                applyAudioOnlyMode()
             }
         )
         settingsSheet.show(supportFragmentManager, SettingsBottomSheet.TAG)
-    }
-
-    private fun applyAudioOnlyMode() {
-        val enabled = settings.isAudioOnlyEnabled
-        executeJs("if (window.BraveMusicControls && window.BraveMusicControls.setAudioOnly) { window.BraveMusicControls.setAudioOnly($enabled); }")
     }
 
     private fun requestNotificationPermission() {

@@ -81,6 +81,7 @@ yt-icon[icon*="youtube" i] {
  * Hide Empty Thumbnail Placeholder & Inactive Player Bar when No Song is Playing
  * (Eliminates the empty rectangular black box on the bottom left)
  */
+.mweb-thumbnail-image-wrapper:has(img[hidden]),
 .mweb-thumbnail-image-wrapper:has(img[src=""]),
 .mweb-thumbnail-image-wrapper:has(img:not([src])),
 ytmusic-player-bar[inert],
@@ -139,47 +140,4 @@ tp-yt-paper-dialog:has(ytmusic-mealbar-promo-renderer) {
     display: none !important;
     pointer-events: none !important;
     visibility: hidden !important;
-}
-
-/*
- * Audio-Only Mode: Suppress video rendering and display high-res album artwork
- */
-body.audio-only-mode ytmusic-player #song-image.ytmusic-player {
-    display: block !important;
-}
-
-body.audio-only-mode ytmusic-player #song-video.ytmusic-player {
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    height: 0 !important;
-}
-
-/*
- * Native Player & Header Architecture: Suppress web player UI and web header
- * (Preserves audio engine and action triggers in DOM without visual or touch interference)
- */
-ytmusic-nav-bar {
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    height: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-ytmusic-player-bar {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
-ytmusic-player-page {
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-#browse-page, ytmusic-browse-response, #content {
-    padding-bottom: 76px !important;
 }
